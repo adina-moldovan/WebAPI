@@ -1,0 +1,9 @@
+c:\users\adina\documents\visual studio 2013\Projects\WebAPI\WebAPI\bin\WebAPI.dll.config
+c:\users\adina\documents\visual studio 2013\Projects\WebAPI\WebAPI\bin\WebAPI.dll
+c:\users\adina\documents\visual studio 2013\Projects\WebAPI\WebAPI\bin\WebAPI.pdb
+c:\users\adina\documents\visual studio 2013\Projects\WebAPI\WebAPI\bin\JsonServices.dll
+c:\users\adina\documents\visual studio 2013\Projects\WebAPI\WebAPI\bin\JsonServices.Web.dll
+c:\users\adina\documents\visual studio 2013\Projects\WebAPI\WebAPI\bin\Newtonsoft.Json.dll
+c:\users\adina\documents\visual studio 2013\Projects\WebAPI\WebAPI\obj\Debug\WebAPI.csprojResolveAssemblyReference.cache
+c:\users\adina\documents\visual studio 2013\Projects\WebAPI\WebAPI\obj\Debug\WebAPI.dll
+c:\users\adina\documents\visual studio 2013\Projects\WebAPI\WebAPI\obj\Debug\WebAPI.pdb
