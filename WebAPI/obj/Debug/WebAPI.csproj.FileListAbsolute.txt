@@ -6,3 +6,4 @@ C:\Users\Adina\Documents\Visual Studio 2013\Projects\WebAPI\WebAPI\bin\JsonServi
 C:\Users\Adina\Documents\Visual Studio 2013\Projects\WebAPI\WebAPI\bin\Newtonsoft.Json.dll
 C:\Users\Adina\Documents\Visual Studio 2013\Projects\WebAPI\WebAPI\obj\Debug\WebAPI.dll
 C:\Users\Adina\Documents\Visual Studio 2013\Projects\WebAPI\WebAPI\obj\Debug\WebAPI.pdb
+C:\Users\Adina\Documents\Visual Studio 2013\Projects\WebAPI\WebAPI\obj\Debug\WebAPI.csprojResolveAssemblyReference.cache

@@ -17,7 +17,7 @@ namespace WebAPI
             dbConnection = DBConnect.getConnection();
         }
 
-        public int CreateNewAccount(string cnp, string email, string password)
+        public int CreateNewAccount(string cnp, string email, string password, string salt)
         {
             const int INVALIDCNP = 0;
             const int ALREADYEXISTS = 1;
@@ -30,7 +30,7 @@ namespace WebAPI
                 dbConnection.Open();
             }
 
-            string query = "SELECT CNP FROM Users WHERE CNP='" + cnp + "';";
+            string query = "SELECT CNP FROM Utiliz WHERE CNP='" + cnp + "';";
             SqlCommand command = new SqlCommand(query, dbConnection);
             SqlDataReader reader = command.ExecuteReader();
 
@@ -46,7 +46,7 @@ namespace WebAPI
             if (reader.HasRows)
             {
                 registerState = SUCCESS;
-                query = "INSERT INTO Users VALUES ('" + cnp + "','" + email + "','" + password + "');";
+                query = "INSERT INTO Utiliz VALUES ('" + cnp + "','" + email + "','" + password + "','" + salt + "');";
                 command = new SqlCommand(query, dbConnection);
                 command.ExecuteNonQuery();
             }
@@ -70,7 +70,7 @@ namespace WebAPI
                 dbConnection.Open();
             }
 
-            string query = "SELECT CNP FROM Users WHERE CNP='" + cnp + "' AND password='" + passsword + "';";
+            string query = "SELECT CNP FROM Utiliz WHERE CNP='" + cnp + "' AND password='" + passsword + "';";
             SqlCommand command = new SqlCommand(query, dbConnection);
             SqlDataReader reader = command.ExecuteReader();
 
@@ -86,47 +86,137 @@ namespace WebAPI
 
         }
 
-        public void CreateDemand(string cnp, string addressee, string request, string mention)
+        public bool CreateDemand(string cnp, string addressee, string request, string mention)
         {
-            if (dbConnection.State.ToString() == "Closed")
-            {
-                dbConnection.Open();
-            }
+            bool demandCreated = false;
 
             string query = "INSERT INTO cereri VALUES ('" + cnp + "','" + addressee + "', '"+ request + "','" + mention + "','" + DateTime.Now +"';";
             SqlCommand command = new SqlCommand(query, dbConnection);
-            SqlDataReader reader = command.ExecuteReader();
 
-            dbConnection.Close();
+            if (command.Connection.State.ToString() == "Closed")
+            {
+                command.Connection.Open();
+            }
+
+            if (command.ExecuteNonQuery() == 1)
+            {
+                demandCreated = true;
+            }
+           
+            command.Connection.Close();
+
+            return demandCreated;
         }
-        public void CreateCertificate(string cnp, string reason)
+
+        public string GetSalt(string cnp)
         {
+            string salt = "";
+
             if (dbConnection.State.ToString() == "Closed")
             {
                 dbConnection.Open();
             }
 
-            string query = "INSERT INTO adev VALUES ('" + cnp + "','" + reason + "','" + DateTime.Now + "';";
+            string query = "SELECT salt FROM Utiliz WHERE cnp ='" + cnp + "';";
             SqlCommand command = new SqlCommand(query, dbConnection);
             SqlDataReader reader = command.ExecuteReader();
 
+            if (reader.HasRows)
+            {
+                salt = reader["salt"].ToString();
+            }
+
+            reader.Close();
             dbConnection.Close();
+            return salt;
         }
-        public UniversityYearInfo GetMarks(string cnp, string year)
+       
+            public bool CreateCertificate(string cnp, string reason)
         {
-            var yearInfo = new UniversityYearInfo();
+            bool certificateCreated = false;
 
-            yearInfo.yearOfStudy = year;
+            string query = "INSERT INTO adev VALUES ('" + cnp + "','" + reason + "','" + DateTime.Now + "';";
+            SqlCommand command = new SqlCommand(query, dbConnection);
 
-            yearInfo.marksTable.Columns.Add(new DataColumn("subjectName", typeof(String)));
-            yearInfo.marksTable.Columns.Add(new DataColumn("semester", typeof(String)));
-            yearInfo.marksTable.Columns.Add(new DataColumn("attempt1", typeof(String)));
-            yearInfo.marksTable.Columns.Add(new DataColumn("attempt2", typeof(String)));
-            yearInfo.marksTable.Columns.Add(new DataColumn("attempt3", typeof(String)));
-            yearInfo.marksTable.Columns.Add(new DataColumn("activityGrade", typeof(String)));
-            yearInfo.marksTable.Columns.Add(new DataColumn("credits", typeof(String)));
-            yearInfo.marksTable.Columns.Add(new DataColumn("department", typeof(String)));
+            if (command.Connection.State.ToString() == "Closed")
+            {
+                command.Connection.Open();
+            }
 
+            if (command.ExecuteNonQuery() == 1)
+            {
+                certificateCreated = true;
+            }
+
+            command.Connection.Close();
+
+            return certificateCreated;
+        }
+
+        public DataTable GetStudentInfo(string cnp)
+        {
+            var studentInfo = new DataTable();
+
+            studentInfo.Columns.Add(new DataColumn("yearOfStudy", typeof(String)));
+            studentInfo.Columns.Add(new DataColumn("lastName", typeof(String)));
+            studentInfo.Columns.Add(new DataColumn("firstName", typeof(String)));
+            studentInfo.Columns.Add(new DataColumn("domain", typeof(String)));
+            studentInfo.Columns.Add(new DataColumn("specialty", typeof(String)));
+            studentInfo.Columns.Add(new DataColumn("mark", typeof(String)));
+            studentInfo.Columns.Add(new DataColumn("statute", typeof(String)));
+            studentInfo.Columns.Add(new DataColumn("financialSource", typeof(String)));
+
+            DataRow row = studentInfo.NewRow();
+            
+            if (dbConnection.State.ToString() == "Closed")
+            {
+                dbConnection.Open();
+            }
+
+            
+            string query = "SELECT nume_fam, prenume FROM evidstud WHERE cnp ='" + cnp + "';";
+            SqlCommand command = new SqlCommand(query, dbConnection);
+            SqlDataReader reader = command.ExecuteReader();
+
+           
+            if (reader.HasRows)
+            {
+                row["lastName"] = reader["nume_fam"].ToString();
+                row["firstName"] = reader["prenume"].ToString();
+            }
+
+            query = "SELECT domeniu, spec, marca, an_stud, statut1,sursa_fin FROM sit_sc WHERE cnp ='" + cnp + "';";
+            command = new SqlCommand(query, dbConnection);
+            reader = command.ExecuteReader();
+
+            if (reader.HasRows)
+            {
+                row["domain"] = reader["domeniu"].ToString();
+                row["specialty"] = reader["spec"].ToString();
+                row["mark"] = reader["marca"].ToString();
+                row["yearOfStudy"] = reader["an_stud"].ToString();
+                row["statute"] = reader["statut1"].ToString();
+                row["financialSource"] = reader["sursa_fin"].ToString();
+
+                studentInfo.Rows.Add(row);
+            }
+            reader.Close();
+            dbConnection.Close();
+            return studentInfo;
+        }
+       
+        public DataTable GetMarks(string cnp, string year)
+        {
+            var marks = new DataTable();
+
+            marks.Columns.Add(new DataColumn("subjectName", typeof(String)));
+            marks.Columns.Add(new DataColumn("semester", typeof(String)));
+            marks.Columns.Add(new DataColumn("attempt1", typeof(String)));
+            marks.Columns.Add(new DataColumn("attempt2", typeof(String)));
+            marks.Columns.Add(new DataColumn("attempt3", typeof(String)));
+            marks.Columns.Add(new DataColumn("activityGrade", typeof(String)));
+            marks.Columns.Add(new DataColumn("credits", typeof(String)));
+            marks.Columns.Add(new DataColumn("department", typeof(String)));
 
             if (dbConnection.State.ToString() == "Closed")
             {
@@ -141,50 +231,35 @@ namespace WebAPI
             {
                 while (reader.Read())
                 {
-                    yearInfo.marksTable.Rows.Add(reader["DEN_DISC"], reader["SEM"], reader["PREZ1"], reader["PREZ2"], reader["PREZ3"], reader["NP"], reader["CREDIT"], reader["COD_DEP"]);
+                    marks.Rows.Add(reader["DEN_DISC"], reader["SEM"], reader["PREZ1"], reader["PREZ2"], reader["PREZ3"], reader["NP"], reader["CREDIT"], reader["COD_DEP"]);
                 }
-            }
-
-            query = "SELECT nume_fam, prenume FROM evidstud WHERE cnp ='" + cnp + "';";
-            command = new SqlCommand(query, dbConnection);
-            reader = command.ExecuteReader();
-
-            if (reader.HasRows)
-            {
-                yearInfo.lastName = reader["nume_fam"].ToString();
-                yearInfo.firstName = reader["prenume"].ToString();
-            }
-
-            query = "SELECT domeniu, spec, marca, statut1,sursa_fin FROM sit_sc WHERE cnp ='" + cnp + "';";
-            command = new SqlCommand(query, dbConnection);
-            reader = command.ExecuteReader();
-
-            if (reader.HasRows)
-            {
-                yearInfo.domain = reader["domeniu"].ToString();
-                yearInfo.specialty = reader["spec"].ToString();
-                yearInfo.mark = reader["marca"].ToString();
-                yearInfo.statute = reader["statut1"].ToString();
-                yearInfo.financialSource = reader["sursa_fin"].ToString();
-        
             }
 
             reader.Close();
             dbConnection.Close();
-            return yearInfo;
+            return marks;
         }
-        public void PayReceipt(string cnp, string subject, string teacher)
+        
+        public bool PayReceipt(string cnp, string subject, string teacher)
         {
-            if (dbConnection.State.ToString() == "Closed")
+            bool paymentSucceed = false;
+
+            string query = "INSERT INTO chitante VALUES ('" + cnp + "','" + subject + "','" + "','" + teacher + "','" + DateTime.Now + "';";
+            SqlCommand command = new SqlCommand(query, dbConnection);
+
+            if (command.Connection.State.ToString() == "Closed")
             {
-                dbConnection.Open();
+                command.Connection.Open();
             }
 
-            string query = "INSERT INTO adev VALUES ('" + cnp + "','" + subject + "','" + "','"+ teacher + "','" + DateTime.Now + "';";
-            SqlCommand command = new SqlCommand(query, dbConnection);
-            SqlDataReader reader = command.ExecuteReader();
+            if (command.ExecuteNonQuery() == 1)
+            {
+                paymentSucceed = true;
+            }
 
-            dbConnection.Close();
+            command.Connection.Close();
+
+            return paymentSucceed;
         }
 
        
