@@ -19,7 +19,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>06/09/2012 21:00:10</publishTime>
     </File>
     <File Include="bin/WebAPI.dll">
-      <publishTime>05/06/2015 17:55:19</publishTime>
+      <publishTime>05/24/2015 20:31:41</publishTime>
     </File>
     <File Include="Handler1.ashx">
       <publishTime>05/02/2015 12:51:16</publishTime>

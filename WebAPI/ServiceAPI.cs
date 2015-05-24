@@ -70,7 +70,7 @@ namespace WebAPI
                 dbConnection.Open();
             }
 
-            string query = "SELECT CNP FROM Utiliz WHERE CNP='" + cnp + "' AND password='" + passsword + "';";
+            string query = "SELECT CNP FROM Utiliz WHERE CNP='" + cnp + "' AND parola='" + passsword + "';";
             SqlCommand command = new SqlCommand(query, dbConnection);
             SqlDataReader reader = command.ExecuteReader();
 
@@ -90,7 +90,7 @@ namespace WebAPI
         {
             bool demandCreated = false;
 
-            string query = "INSERT INTO cereri VALUES ('" + cnp + "','" + addressee + "', '"+ request + "','" + mention + "','" + DateTime.Now +"';";
+            string query = "INSERT INTO cereri VALUES ('" + cnp + "','" + addressee + "', '" + request + "','" + mention + "','" + DateTime.Today.ToString("yyyy-MM-dd") + "');";
             SqlCommand command = new SqlCommand(query, dbConnection);
 
             if (command.Connection.State.ToString() == "Closed")
@@ -121,9 +121,12 @@ namespace WebAPI
             SqlCommand command = new SqlCommand(query, dbConnection);
             SqlDataReader reader = command.ExecuteReader();
 
-            if (reader.HasRows)
+            if (reader.Read())
             {
-                salt = reader["salt"].ToString();
+                if (reader.HasRows)
+                {
+                    salt = reader["salt"].ToString();
+                }
             }
 
             reader.Close();
@@ -135,7 +138,7 @@ namespace WebAPI
         {
             bool certificateCreated = false;
 
-            string query = "INSERT INTO adev VALUES ('" + cnp + "','" + reason + "','" + DateTime.Now + "';";
+            string query = "INSERT INTO adev VALUES ('" + cnp + "','" + reason + "','" + DateTime.Today.ToString("yyyy-MM-dd") + "');";
             SqlCommand command = new SqlCommand(query, dbConnection);
 
             if (command.Connection.State.ToString() == "Closed")
@@ -178,28 +181,33 @@ namespace WebAPI
             SqlCommand command = new SqlCommand(query, dbConnection);
             SqlDataReader reader = command.ExecuteReader();
 
-           
-            if (reader.HasRows)
+            if (reader.Read())
             {
-                row["lastName"] = reader["nume_fam"].ToString();
-                row["firstName"] = reader["prenume"].ToString();
+                if (reader.HasRows)
+                {
+                    row["lastName"] = reader["nume_fam"].ToString();
+                    row["firstName"] = reader["prenume"].ToString();
+                }
             }
-
             query = "SELECT domeniu, spec, marca, an_stud, statut1,sursa_fin FROM sit_sc WHERE cnp ='" + cnp + "';";
             command = new SqlCommand(query, dbConnection);
             reader = command.ExecuteReader();
 
-            if (reader.HasRows)
+            if (reader.Read())
             {
-                row["domain"] = reader["domeniu"].ToString();
-                row["specialty"] = reader["spec"].ToString();
-                row["mark"] = reader["marca"].ToString();
-                row["yearOfStudy"] = reader["an_stud"].ToString();
-                row["statute"] = reader["statut1"].ToString();
-                row["financialSource"] = reader["sursa_fin"].ToString();
+                if (reader.HasRows)
+                {
+                    row["domain"] = reader["domeniu"].ToString();
+                    row["specialty"] = reader["spec"].ToString();
+                    row["mark"] = reader["marca"].ToString();
+                    row["yearOfStudy"] = reader["an_stud"].ToString();
+                    row["statute"] = reader["statut1"].ToString();
+                    row["financialSource"] = reader["sursa_fin"].ToString();
 
-                studentInfo.Rows.Add(row);
+                    studentInfo.Rows.Add(row);
+                }
             }
+
             reader.Close();
             dbConnection.Close();
             return studentInfo;
@@ -244,7 +252,7 @@ namespace WebAPI
         {
             bool paymentSucceed = false;
 
-            string query = "INSERT INTO chitante VALUES ('" + cnp + "','" + subject + "','" + "','" + teacher + "','" + DateTime.Now + "';";
+            string query = "INSERT INTO chitante VALUES ('" + cnp + "','" + subject + "','" + "','" + teacher + "','" + DateTime.Today.ToString("yyyy-MM-dd") + "');";
             SqlCommand command = new SqlCommand(query, dbConnection);
 
             if (command.Connection.State.ToString() == "Closed")
